@@ -26,6 +26,7 @@ Design note — sync vs async:
 import asyncio
 import json
 import os
+import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncIterator
@@ -93,19 +94,21 @@ async def lifespan(server: FastMCP) -> AsyncIterator[AppState]:
     except Exception as e:
         docker_client = None
         reachable = False
-        print(f"[devops-mcp] WARNING: Could not connect to Docker: {e}", flush=True)
+        print(f"[devops-mcp] WARNING: Could not connect to Docker: {e}", file=sys.stderr, flush=True)
 
     if reachable:
-        print("[devops-mcp] Docker daemon reachable", flush=True)
+        print("[devops-mcp] Docker daemon reachable", file=sys.stderr, flush=True)
     else:
         print(
             "[devops-mcp] WARNING: Docker daemon not reachable. "
             "Docker tools will return errors until Docker Desktop is running.",
+            file=sys.stderr,
             flush=True,
         )
 
     print(
         f"[devops-mcp] Allowed shell commands: {', '.join(sorted(ALLOWED_COMMANDS))}",
+        file=sys.stderr,
         flush=True,
     )
 
@@ -116,7 +119,7 @@ async def lifespan(server: FastMCP) -> AsyncIterator[AppState]:
     finally:
         if docker_client:
             docker_client.close()
-        print("[devops-mcp] Shutdown complete.", flush=True)
+        print("[devops-mcp] Shutdown complete.", file=sys.stderr, flush=True)
 
 
 # --------------------------------------------------------------------------- #
